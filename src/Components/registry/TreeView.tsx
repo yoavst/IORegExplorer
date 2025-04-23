@@ -14,7 +14,7 @@ const TreeView: FC<TreeViewProps> = ({ entries, searchTerm, onSelectEntry, selec
         <div className="py-2">
             {entries.map((node) => (
                 <TreeNode
-                    key={node.id}
+                    key={node.index}
                     node={node}
                     level={0}
                     onSelect={onSelectEntry}

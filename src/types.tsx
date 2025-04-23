@@ -1,14 +1,15 @@
 export interface IORegEntry {
     name: string
     className: string
+    parentClasses: string[]
     id: string
+    index: number
     status: string
-    properties?: Record<string, unknown>
-    parentId: string | null
+    properties: Record<string, unknown>
+    parentIndex: number | null
 }
 
 export type NodeOf<T> = T & {
     id: string
-    initiallyExpanded?: boolean
     children: NodeOf<T>[]
 }

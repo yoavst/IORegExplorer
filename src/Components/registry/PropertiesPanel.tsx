@@ -10,6 +10,7 @@ import {
 } from '@/Components/ui/table'
 import { Badge } from '@/Components/ui/badge'
 import { IORegEntry, NodeOf } from '@/types'
+import InhertianceChain from './InhertianceChain'
 
 interface PropertiesPanelProps {
     entry: NodeOf<IORegEntry> | undefined
@@ -24,7 +25,7 @@ const PropertiesPanel: FC<PropertiesPanelProps> = ({ entry }) => {
         )
     }
 
-    const properties = entry.properties ? Object.entries(entry.properties) : []
+    const properties = Object.entries(entry.properties)
 
     return (
         <ScrollArea className="h-full">
@@ -35,9 +36,7 @@ const PropertiesPanel: FC<PropertiesPanelProps> = ({ entry }) => {
                     </h2>
                     <div className="space-y-1">
                         {entry.className && (
-                            <p className="text-sm text-gray-300">
-                                <span className="font-semibold">Class:</span> {entry.className}
-                            </p>
+                            <InhertianceChain currentClass={entry.className} inhertianceChain={entry.parentClasses} />
                         )}
                         <p className="text-sm text-gray-300">
                             <span className="font-semibold">ID:</span> {entry.id}

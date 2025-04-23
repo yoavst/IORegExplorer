@@ -37,7 +37,7 @@ const TreeNode: FC<TreeNodeProps> = ({
     autoExpand = false,
     searchTerm,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(node.initiallyExpanded ?? autoExpand)
+    const [isExpanded, setIsExpanded] = useState(true)
 
     useEffect(() => {
         if (autoExpand) {
@@ -52,7 +52,8 @@ const TreeNode: FC<TreeNodeProps> = ({
             <div
                 className={cn(
                     'flex items-center py-1 hover:bg-gray-800 cursor-pointer select-none rounded-sm transition-colors',
-                    selectedNode?.id === node.id && 'bg-gray-700 hover:bg-gray-700 text-blue-300'
+                    selectedNode?.index === node.index &&
+                        'bg-gray-700 hover:bg-gray-700 text-blue-300'
                 )}
                 style={{ paddingLeft: `${level * 16}px` }}
                 onClick={() => {
@@ -102,7 +103,7 @@ const TreeNode: FC<TreeNodeProps> = ({
                         .filter((node) => shouldShow(node, searchTerm))
                         .map((child) => (
                             <TreeNode
-                                key={child.id}
+                                key={child.index}
                                 node={child}
                                 level={level + 1}
                                 onSelect={onSelect}

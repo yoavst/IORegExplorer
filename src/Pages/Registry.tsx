@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import SearchBar from '../components/registry/SearchBar'
-import TreeView from '../components/registry/TreeView'
-import PropertiesPanel from '../components/registry/PropertiesPanel'
-import FileUploader from '../components/registry/FileUploader'
+import { useState, useEffect, useCallback, FC, MouseEvent, useMemo } from 'react'
+import SearchBar from '../Components/registry/SearchBar'
+import TreeView from '../Components/registry/TreeView'
+import PropertiesPanel from '../Components/registry/PropertiesPanel'
+import FileUploader from '../Components/registry/FileUploader'
+import { IORegEntry, NodeOf } from '@/types'
 
-const DEVICES = [
+const IORegEntries: IORegEntry[] = [
     {
         name: 'IOUserServer(com.apple.bcmwlan-0x100000588)',
         className: 'IOUserServer',
@@ -93,11 +94,6 @@ const DEVICES = [
             IOUserServerTag: 4294968712,
         },
         parentId: '0x100000477',
-        depth: 2.0,
-        created_date: '2025-04-22T14:53:57.847000',
-        updated_date: '2025-04-22T14:53:57.847000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'AppleSMC',
@@ -114,11 +110,6 @@ const DEVICES = [
             RevisionID: 1,
         },
         parentId: 'root-1',
-        depth: 1.0,
-        created_date: '2025-04-22T14:56:33.015000',
-        updated_date: '2025-04-22T14:56:33.015000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOHIDSystem',
@@ -132,11 +123,6 @@ const DEVICES = [
             HIDIdleTime: 3000000000,
         },
         parentId: 'root-1',
-        depth: 1.0,
-        created_date: '2025-04-22T14:56:33.015000',
-        updated_date: '2025-04-22T14:56:33.015000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOGraphicsFamily',
@@ -149,11 +135,6 @@ const DEVICES = [
             IOMatchCategory: 'IODefaultMatchCategory',
         },
         parentId: 'root-1',
-        depth: 1.0,
-        created_date: '2025-04-22T14:56:33.015000',
-        updated_date: '2025-04-22T14:56:33.015000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'AppleM1Controller',
@@ -172,11 +153,6 @@ const DEVICES = [
             'Built-in': true,
         },
         parentId: 'graphics-3000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.015000',
-        updated_date: '2025-04-22T14:56:33.015000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'AppleIntelME',
@@ -191,11 +167,6 @@ const DEVICES = [
             FirmwareVersion: '11.8.65.3590',
         },
         parentId: 'graphics-3000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.015000',
-        updated_date: '2025-04-22T14:56:33.015000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOPCIFamily',
@@ -208,11 +179,6 @@ const DEVICES = [
             IOMatchCategory: 'IODefaultMatchCategory',
         },
         parentId: 'root-1',
-        depth: 1.0,
-        created_date: '2025-04-22T14:56:33.036000',
-        updated_date: '2025-04-22T14:56:33.036000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'pci-bridge',
@@ -230,11 +196,6 @@ const DEVICES = [
             name: 'pci-bridge',
         },
         parentId: 'pci-4000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.036000',
-        updated_date: '2025-04-22T14:56:33.036000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'AppleNVMe',
@@ -252,11 +213,6 @@ const DEVICES = [
             capacity: 1024209543168,
         },
         parentId: 'pci-bridge-4001',
-        depth: 3.0,
-        created_date: '2025-04-22T14:56:33.036000',
-        updated_date: '2025-04-22T14:56:33.036000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'BCM4378',
@@ -274,11 +230,6 @@ const DEVICES = [
             'Bluetooth Core Spec': '5.0',
         },
         parentId: 'pci-bridge-4001',
-        depth: 3.0,
-        created_date: '2025-04-22T14:56:33.036000',
-        updated_date: '2025-04-22T14:56:33.036000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IONetworkFamily',
@@ -291,11 +242,6 @@ const DEVICES = [
             IOMatchCategory: 'IODefaultMatchCategory',
         },
         parentId: 'root-1',
-        depth: 1.0,
-        created_date: '2025-04-22T14:56:33.036000',
-        updated_date: '2025-04-22T14:56:33.036000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'en0',
@@ -314,11 +260,6 @@ const DEVICES = [
             IOMediaAddressLength: 6,
         },
         parentId: 'network-5000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.058000',
-        updated_date: '2025-04-22T14:56:33.058000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'en1',
@@ -336,11 +277,6 @@ const DEVICES = [
             IOMediaAddressLength: 6,
         },
         parentId: 'network-5000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.058000',
-        updated_date: '2025-04-22T14:56:33.058000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOThunderboltFamily',
@@ -353,11 +289,6 @@ const DEVICES = [
             IOMatchCategory: 'IODefaultMatchCategory',
         },
         parentId: 'root-1',
-        depth: 1.0,
-        created_date: '2025-04-22T14:56:33.058000',
-        updated_date: '2025-04-22T14:56:33.058000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOThunderboltSwitch',
@@ -375,11 +306,6 @@ const DEVICES = [
             'Port Count': 4,
         },
         parentId: 'tb-6000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.058000',
-        updated_date: '2025-04-22T14:56:33.058000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'USB3.1 Type-C Port 1',
@@ -397,11 +323,6 @@ const DEVICES = [
             UsbCPortNumber: 1,
         },
         parentId: 'tb-switch-6001',
-        depth: 3.0,
-        created_date: '2025-04-22T14:56:33.058000',
-        updated_date: '2025-04-22T14:56:33.058000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'USB3.1 Type-C Port 2',
@@ -419,11 +340,6 @@ const DEVICES = [
             UsbCPortNumber: 2,
         },
         parentId: 'tb-switch-6001',
-        depth: 3.0,
-        created_date: '2025-04-22T14:56:33.077000',
-        updated_date: '2025-04-22T14:56:33.077000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOUSBHostFamily',
@@ -436,11 +352,6 @@ const DEVICES = [
             IOMatchCategory: 'IODefaultMatchCategory',
         },
         parentId: 'root-1',
-        depth: 1.0,
-        created_date: '2025-04-22T14:56:33.077000',
-        updated_date: '2025-04-22T14:56:33.077000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOUSBHostDevice',
@@ -459,11 +370,6 @@ const DEVICES = [
             'USB Release': 256,
         },
         parentId: 'usb-7000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.077000',
-        updated_date: '2025-04-22T14:56:33.077000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOUSBHostDevice',
@@ -482,11 +388,6 @@ const DEVICES = [
             'USB Release': 256,
         },
         parentId: 'usb-7000',
-        depth: 2.0,
-        created_date: '2025-04-22T14:56:33.077000',
-        updated_date: '2025-04-22T14:56:33.077000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'AppleARMPE',
@@ -499,10 +400,6 @@ const DEVICES = [
             IOProviderClass: 'IOPlatformExpertDevice',
         },
         parentId: 'root-1',
-        created_date: '2025-04-23T10:28:39.125000',
-        updated_date: '2025-04-23T10:28:39.125000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOSystemStateNotification',
@@ -518,10 +415,6 @@ const DEVICES = [
             },
         },
         parentId: '0x1000001c5',
-        created_date: '2025-04-23T10:28:39.125000',
-        updated_date: '2025-04-23T10:28:39.125000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'arm-io',
@@ -533,10 +426,6 @@ const DEVICES = [
             IONameMatch: 'arm-io',
         },
         parentId: '0x1000001c5',
-        created_date: '2025-04-23T10:28:39.125000',
-        updated_date: '2025-04-23T10:28:39.125000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'Root',
@@ -548,10 +437,6 @@ const DEVICES = [
             OSBuildVersion: '24981',
         },
         parentId: null,
-        created_date: '2025-04-23T10:32:37.931000',
-        updated_date: '2025-04-23T10:32:37.931000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'AppleARMPE',
@@ -563,10 +448,6 @@ const DEVICES = [
             CFBundleIdentifier: 'com.apple.driver.AppleARMPlatform',
         },
         parentId: 'root-1',
-        created_date: '2025-04-23T10:32:37.931000',
-        updated_date: '2025-04-23T10:32:37.931000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'IOSystemStateNotification',
@@ -579,10 +460,6 @@ const DEVICES = [
             },
         },
         parentId: 'arm-pe-1',
-        created_date: '2025-04-23T10:32:37.931000',
-        updated_date: '2025-04-23T10:32:37.931000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'arm-io',
@@ -593,10 +470,6 @@ const DEVICES = [
             IOClass: 'AppleARMIODevice',
         },
         parentId: 'arm-pe-1',
-        created_date: '2025-04-23T10:32:37.931000',
-        updated_date: '2025-04-23T10:32:37.931000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'AppleIHGFamilyIO',
@@ -607,10 +480,6 @@ const DEVICES = [
             IOClass: 'AppleIHGFamilyIO',
         },
         parentId: 'arm-io-1',
-        created_date: '2025-04-23T10:32:37.931000',
-        updated_date: '2025-04-23T10:32:37.931000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'i2c1',
@@ -621,10 +490,6 @@ const DEVICES = [
             IOClass: 'I2CController',
         },
         parentId: 'ihg-family-1',
-        created_date: '2025-04-23T10:32:37.931000',
-        updated_date: '2025-04-23T10:32:37.931000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
     {
         name: 'audio-speaker-left-tweeter',
@@ -635,47 +500,78 @@ const DEVICES = [
             Type: 'Speaker',
         },
         parentId: 'i2c-1',
-        created_date: '2025-04-23T10:32:37.931000',
-        updated_date: '2025-04-23T10:32:37.931000',
-        created_by: 'yoav.sternberg@gmail.com',
-        is_sample: false,
     },
 ]
 
-export default function Registry() {
-    const [devices, setDevices] = useState([])
-    const [selectedDevice, setSelectedDevice] = useState(null)
-    const [searchTerm, setSearchTerm] = useState('')
-    const [leftPanelWidth, setLeftPanelWidth] = useState(40) // percentage
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+const buildTree = (entries: IORegEntry[]): NodeOf<IORegEntry>[] => {
+    // Create a map of all devices by ID for quick lookup
+    const entryMap = new Map<string, NodeOf<IORegEntry>>()
+
+    // First pass: create all nodes without children
+    entries.forEach((device) => {
+        entryMap.set(device.id, { ...device, children: [] })
+    })
+
+    // Second pass: build parent-child relationships
+    const roots: NodeOf<IORegEntry>[] = []
+
+    entries.forEach((device) => {
+        const node = entryMap.get(device.id)!
+
+        if (device.parentId && entryMap.has(device.parentId)) {
+            // If device has a parent in our map, add it as child
+            const parent = entryMap.get(device.parentId)!
+            parent.children.push(node)
+        } else {
+            // If no parent or parent not found, it's a root
+            roots.push(node)
+        }
+    })
+
+    const compareNodes = (a: NodeOf<IORegEntry>, b: NodeOf<IORegEntry>): number => {
+        return (a.name || '').localeCompare(b.name || '')
+    }
+
+    // Recursive function to sort the tree
+    const sortTree = (node: NodeOf<IORegEntry>) => {
+        if (node.children && node.children.length > 0) {
+            node.children.sort(compareNodes)
+            node.children.forEach(sortTree)
+        }
+    }
+
+    // Sort the tree
+    roots.sort((a, b) => {
+        // Root always comes first if present
+        if (a.name === 'Root') return -1
+        if (b.name === 'Root') return 1
+
+        return compareNodes(a, b)
+    })
+    roots.forEach(sortTree)
+
+    // Expand the first level of children for root nodes
+    roots.forEach((root) => {
+        root.initiallyExpanded = true
+    })
+
+    return roots
+}
+
+const Registry: FC<{}> = () => {
+    const [entries, setEntries] = useState<IORegEntry[]>([])
+    const tree = useMemo(() => buildTree(entries), [entries])
+    const [selectedEntry, setSelectedEntry] = useState<NodeOf<IORegEntry> | undefined>(undefined)
+    const [searchTerm, setSearchTerm] = useState<string>('')
+    const [leftPanelWidth, setLeftPanelWidth] = useState<number>(40) // percentage
+    const [loading, setLoading] = useState<boolean>(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         setLoading(true)
         setError(null)
         try {
-            const allDevices = DEVICES
-            console.log('Loaded devices:', allDevices.length)
-
-            if (allDevices.length === 0) {
-                // If no devices exist, create a root device
-                const rootDevice = {
-                    name: 'Root',
-                    className: 'IORegistryEntry',
-                    id: 'root-1',
-                    status: 'active',
-                    properties: {
-                        IOKitBuildVersion: 'Example Registry',
-                    },
-                }
-
-                // FIXME: load devices
-                // await IODevice.create(rootDevice)
-                setDevices([{ ...rootDevice, children: [] }])
-            } else {
-                const rootDevices = buildTree(allDevices)
-                setDevices(rootDevices)
-            }
+            setEntries(IORegEntries)
         } catch (err) {
             console.error('Error loading devices:', err)
             setError('Failed to load devices. Please try again.')
@@ -684,88 +580,30 @@ export default function Registry() {
         }
     }, [])
 
-    const buildTree = (devices) => {
-        // Create a map of all devices by ID for quick lookup
-        const deviceMap = new Map()
-
-        // First pass: create all nodes without children
-        devices.forEach((device) => {
-            deviceMap.set(device.id, { ...device, children: [] })
-        })
-
-        // Second pass: build parent-child relationships
-        const roots = []
-
-        devices.forEach((device) => {
-            const node = deviceMap.get(device.id)
-
-            if (device.parentId && deviceMap.has(device.parentId)) {
-                // If device has a parent in our map, add it as child
-                const parent = deviceMap.get(device.parentId)
-                parent.children.push(node)
-            } else {
-                // If no parent or parent not found, it's a root
-                roots.push(node)
-            }
-        })
-
-        // Recursive function to sort the tree
-        const sortTree = (node) => {
-            if (node.children && node.children.length > 0) {
-                node.children.sort((a, b) => {
-                    const nameA = (a.name || '').toLowerCase()
-                    const nameB = (b.name || '').toLowerCase()
-                    return nameA.localeCompare(nameB)
-                })
-                node.children.forEach(sortTree)
-            }
-        }
-
-        // Sort the tree
-        roots.sort((a, b) => {
-            // Root always comes first if present
-            if (a.name === 'Root') return -1
-            if (b.name === 'Root') return 1
-
-            const nameA = (a.name || '').toLowerCase()
-            const nameB = (b.name || '').toLowerCase()
-            return nameA.localeCompare(nameB)
-        })
-
-        roots.forEach(sortTree)
-
-        // Expand the first level of children for root nodes
-        roots.forEach((root) => {
-            root.initiallyExpanded = true
-        })
-
-        return roots
-    }
-
-    const searchDevices = (term) => {
-        setSearchTerm(term.toLowerCase())
-    }
-
     // Handle manual resizing with mouse drag
-    const startResize = (e) => {
-        const startX = e.clientX
-        const startWidth = leftPanelWidth
+    const startResize = useCallback(
+        (e: MouseEvent) => {
+            const startX = e.clientX
+            const startWidth = leftPanelWidth
+            // FIXME: wtf
 
-        const doDrag = (e) => {
-            const containerWidth = document.getElementById('registry-container').offsetWidth
-            const newWidth = startWidth + ((e.clientX - startX) / containerWidth) * 100
-            // Constrain between 20% and 80%
-            setLeftPanelWidth(Math.min(80, Math.max(20, newWidth)))
-        }
+            const doDrag = (e) => {
+                const containerWidth = document.getElementById('registry-container').offsetWidth
+                const newWidth = startWidth + ((e.clientX - startX) / containerWidth) * 100
+                // Constrain between 20% and 80%
+                setLeftPanelWidth(Math.min(80, Math.max(20, newWidth)))
+            }
 
-        const stopDrag = () => {
-            document.removeEventListener('mousemove', doDrag)
-            document.removeEventListener('mouseup', stopDrag)
-        }
+            const stopDrag = () => {
+                document.removeEventListener('mousemove', doDrag)
+                document.removeEventListener('mouseup', stopDrag)
+            }
 
-        document.addEventListener('mousemove', doDrag)
-        document.addEventListener('mouseup', stopDrag)
-    }
+            document.addEventListener('mousemove', doDrag)
+            document.addEventListener('mouseup', stopDrag)
+        },
+        [leftPanelWidth]
+    )
 
     return (
         <div id="registry-container" className="h-screen flex flex-col bg-gray-900 text-gray-100">
@@ -777,7 +615,7 @@ export default function Registry() {
                 >
                     <div className="p-4 border-b border-gray-700 bg-gray-800">
                         <div className="flex flex-col gap-4">
-                            <SearchBar onSearch={searchDevices} />
+                            <SearchBar onSearch={(query) => setSearchTerm(query.toLowerCase())} />
                             <FileUploader
                                 onUploadComplete={() => {
                                     /*FIXME */
@@ -797,18 +635,18 @@ export default function Registry() {
                             <div className="p-4 text-center text-red-400">{error}</div>
                         )}
 
-                        {!loading && !error && devices.length === 0 && (
+                        {!loading && !error && entries.length === 0 && (
                             <div className="p-4 text-center text-gray-400">
                                 No devices found. Upload an IOReg log file to begin.
                             </div>
                         )}
 
-                        {!loading && devices.length > 0 && (
+                        {!loading && entries.length > 0 && (
                             <TreeView
-                                devices={devices}
+                                entries={tree}
                                 searchTerm={searchTerm}
-                                onSelectDevice={setSelectedDevice}
-                                selectedDevice={selectedDevice}
+                                onSelectEntry={setSelectedEntry}
+                                selectedEntry={selectedEntry}
                             />
                         )}
                     </div>
@@ -825,9 +663,11 @@ export default function Registry() {
                     style={{ width: `${100 - leftPanelWidth}%` }}
                     className="h-full overflow-auto bg-gray-800"
                 >
-                    <PropertiesPanel device={selectedDevice} />
+                    <PropertiesPanel entry={selectedEntry} />
                 </div>
             </div>
         </div>
     )
 }
+
+export default Registry

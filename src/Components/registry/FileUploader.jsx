@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/Components/ui/button'
 import { Upload, Loader2 } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@/Components/ui/alert'
 
 export default function FileUploader({ onUploadComplete }) {
     const [isLoading, setIsLoading] = useState(false)

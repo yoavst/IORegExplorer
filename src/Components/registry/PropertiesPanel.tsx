@@ -1,5 +1,5 @@
-import React from 'react'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { FC } from 'react'
+import { ScrollArea } from '@/Components/ui/scroll-area'
 import {
     Table,
     TableBody,
@@ -7,44 +7,49 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+} from '@/Components/ui/table'
+import { Badge } from '@/Components/ui/badge'
+import { IORegEntry, NodeOf } from '@/types'
 
-export default function PropertiesPanel({ device }) {
-    if (!device) {
+type PropertiesPanelProps = {
+    entry: NodeOf<IORegEntry> | undefined
+}
+
+const PropertiesPanel: FC<PropertiesPanelProps> = ({ entry }) => {
+    if (!entry) {
         return (
             <div className="p-4 text-center text-gray-400">
-                Select a device to view its properties
+                Select an entry to view its properties
             </div>
         )
     }
 
-    const properties = device.properties ? Object.entries(device.properties) : []
+    const properties = entry.properties ? Object.entries(entry.properties) : []
 
     return (
         <ScrollArea className="h-full">
             <div className="p-4">
                 <div className="mb-4">
                     <h2 className="text-xl font-bold text-white mr-3">
-                        {device.name || 'Unnamed Device'}
+                        {entry.name || 'Unnamed Device'}
                     </h2>
                     <div className="space-y-1">
-                        {device.className && (
+                        {entry.className && (
                             <p className="text-sm text-gray-300">
-                                <span className="font-semibold">Class:</span> {device.className}
+                                <span className="font-semibold">Class:</span> {entry.className}
                             </p>
                         )}
                         <p className="text-sm text-gray-300">
-                            <span className="font-semibold">ID:</span> {device.id}
+                            <span className="font-semibold">ID:</span> {entry.id}
                         </p>
-                        {device.status && (
+                        {entry.status && (
                             <p className="text-sm text-gray-300">
                                 <span className="font-semibold">Status:</span>
                                 <Badge
                                     variant="outline"
                                     className="ml-2 font-normal bg-gray-700 text-gray-200 border-gray-600"
                                 >
-                                    {device.status}
+                                    {entry.status}
                                 </Badge>
                             </p>
                         )}
@@ -84,10 +89,12 @@ export default function PropertiesPanel({ device }) {
                     </div>
                 ) : (
                     <div className="text-center text-gray-400 p-4 border border-gray-700 rounded-md">
-                        No properties found for this device
+                        No properties found for this entry
                     </div>
                 )}
             </div>
         </ScrollArea>
     )
 }
+
+export default PropertiesPanel

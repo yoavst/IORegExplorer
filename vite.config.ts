@@ -9,12 +9,12 @@ export default defineConfig({
     plugins: [
         react(),
         tailwindcss(),
-        // checker({
-        //     eslint: { lintCommand: 'eslint .', useFlatConfig: true },
-        //     overlay: {
-        //         initialIsOpen: 'error',
-        //     },
-        // }),
+        checker({
+            eslint: { lintCommand: 'eslint .', useFlatConfig: true },
+            overlay: {
+                initialIsOpen: 'error',
+            },
+        }),
     ],
     resolve: {
         alias: {

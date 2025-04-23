@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { Input } from '@/Components/ui/input'
 import { Search } from 'lucide-react'
 
-type SearchBarProps = {
+interface SearchBarProps {
     onSearch: (query: string) => void
 }
 
@@ -14,7 +14,7 @@ const SearchBar: FC<SearchBarProps> = ({ onSearch }) => {
                 type="text"
                 placeholder="Search devices..."
                 className="pl-8 bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500"
-                onChange={(e) => onSearch(e.target.value)}
+                onChange={(e) => { onSearch(e.target.value); }}
             />
         </div>
     )

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, FC, MouseEvent, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, FC, useMemo, useRef } from 'react'
 import SearchBar from '../Components/registry/SearchBar'
 import TreeView from '../Components/registry/TreeView'
 import PropertiesPanel from '../Components/registry/PropertiesPanel'
@@ -516,10 +516,12 @@ const buildTree = (entries: IORegEntry[]): NodeOf<IORegEntry>[] => {
     const roots: NodeOf<IORegEntry>[] = []
 
     entries.forEach((device) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const node = entryMap.get(device.id)!
 
         if (device.parentId && entryMap.has(device.parentId)) {
             // If device has a parent in our map, add it as child
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const parent = entryMap.get(device.parentId)!
             parent.children.push(node)
         } else {
@@ -534,7 +536,7 @@ const buildTree = (entries: IORegEntry[]): NodeOf<IORegEntry>[] => {
 
     // Recursive function to sort the tree
     const sortTree = (node: NodeOf<IORegEntry>) => {
-        if (node.children && node.children.length > 0) {
+        if (node.children.length > 0) {
             node.children.sort(compareNodes)
             node.children.forEach(sortTree)
         }
@@ -558,7 +560,7 @@ const buildTree = (entries: IORegEntry[]): NodeOf<IORegEntry>[] => {
     return roots
 }
 
-const Registry: FC<{}> = () => {
+const Registry: FC = () => {
     const [entries, setEntries] = useState<IORegEntry[]>([])
     const tree = useMemo(() => buildTree(entries), [entries])
     const [selectedEntry, setSelectedEntry] = useState<NodeOf<IORegEntry> | undefined>(undefined)
@@ -566,6 +568,7 @@ const Registry: FC<{}> = () => {
     const [leftPanelWidth, setLeftPanelWidth] = useState<number>(40) // percentage
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
+    const containerRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
         setLoading(true)
@@ -582,16 +585,17 @@ const Registry: FC<{}> = () => {
 
     // Handle manual resizing with mouse drag
     const startResize = useCallback(
-        (e: MouseEvent) => {
+        (e: React.MouseEvent) => {
             const startX = e.clientX
             const startWidth = leftPanelWidth
-            // FIXME: wtf
 
-            const doDrag = (e) => {
-                const containerWidth = document.getElementById('registry-container').offsetWidth
-                const newWidth = startWidth + ((e.clientX - startX) / containerWidth) * 100
-                // Constrain between 20% and 80%
-                setLeftPanelWidth(Math.min(80, Math.max(20, newWidth)))
+            const doDrag = (e: MouseEvent) => {
+                if (containerRef.current) {
+                    const containerWidth = containerRef.current.offsetWidth
+                    const newWidth = startWidth + ((e.clientX - startX) / containerWidth) * 100
+                    // Constrain between 20% and 80%
+                    setLeftPanelWidth(Math.min(80, Math.max(20, newWidth)))
+                }
             }
 
             const stopDrag = () => {
@@ -606,7 +610,11 @@ const Registry: FC<{}> = () => {
     )
 
     return (
-        <div id="registry-container" className="h-screen flex flex-col bg-gray-900 text-gray-100">
+        <div
+            id="registry-container"
+            className="h-screen flex flex-col bg-gray-900 text-gray-100"
+            ref={containerRef}
+        >
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Panel */}
                 <div
@@ -615,7 +623,11 @@ const Registry: FC<{}> = () => {
                 >
                     <div className="p-4 border-b border-gray-700 bg-gray-800">
                         <div className="flex flex-col gap-4">
-                            <SearchBar onSearch={(query) => setSearchTerm(query.toLowerCase())} />
+                            <SearchBar
+                                onSearch={(query) => {
+                                    setSearchTerm(query.toLowerCase())
+                                }}
+                            />
                             <FileUploader
                                 onUploadComplete={() => {
                                     /*FIXME */

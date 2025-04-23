@@ -2,7 +2,7 @@ import { FC } from 'react'
 import TreeNode from './TreeNode'
 import { IORegEntry, NodeOf } from '@/types'
 
-type TreeViewProps = {
+interface TreeViewProps {
     entries: NodeOf<IORegEntry>[]
     searchTerm: string
     onSelectEntry: (node: NodeOf<IORegEntry>) => void
@@ -10,8 +10,6 @@ type TreeViewProps = {
 }
 
 const TreeView: FC<TreeViewProps> = ({ entries, searchTerm, onSelectEntry, selectedEntry }) => {
-    const autoExpandFirst = (searchTerm ?? '').length > 0
-
     return (
         <div className="py-2">
             {entries.map((node) => (
@@ -21,7 +19,7 @@ const TreeView: FC<TreeViewProps> = ({ entries, searchTerm, onSelectEntry, selec
                     level={0}
                     onSelect={onSelectEntry}
                     selectedNode={selectedEntry}
-                    autoExpand={autoExpandFirst}
+                    autoExpand={searchTerm.length > 0}
                     searchTerm={searchTerm}
                 />
             ))}

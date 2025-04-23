@@ -11,7 +11,7 @@ import {
 import { Badge } from '@/Components/ui/badge'
 import { IORegEntry, NodeOf } from '@/types'
 
-type PropertiesPanelProps = {
+interface PropertiesPanelProps {
     entry: NodeOf<IORegEntry> | undefined
 }
 
@@ -79,7 +79,8 @@ const PropertiesPanel: FC<PropertiesPanelProps> = ({ entry }) => {
                                             <TableCell className="font-mono text-sm whitespace-pre-wrap text-gray-300">
                                                 {typeof value === 'object'
                                                     ? JSON.stringify(value, null, 2)
-                                                    : String(value)}
+                                                    : // eslint-disable-next-line @typescript-eslint/no-base-to-string
+                                                      String(value)}
                                             </TableCell>
                                         </TableRow>
                                     ))}

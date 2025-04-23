@@ -1,9 +1,9 @@
-export type IORegEntry = {
+export interface IORegEntry {
     name: string
     className: string
     id: string
     status: string
-    properties: Record<string, any>
+    properties?: Record<string, unknown>
     parentId: string | null
 }
 

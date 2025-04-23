@@ -7,20 +7,20 @@ const shouldShow = (node: NodeOf<IORegEntry>, searchTerm: string): boolean => {
     if (searchTerm.length === 0) return true
 
     const nodeMatches =
-        (node.name && node.name.toLowerCase().includes(searchTerm)) ||
-        (node.className && node.className.toLowerCase().includes(searchTerm)) ||
-        (node.id && node.id.toLowerCase().includes(searchTerm))
+        node.name.toLowerCase().includes(searchTerm) ||
+        node.className.toLowerCase().includes(searchTerm) ||
+        node.id.toLowerCase().includes(searchTerm)
 
     if (nodeMatches) return true
 
-    if (node.children && node.children.length > 0) {
+    if (node.children.length > 0) {
         return node.children.some((child) => shouldShow(child, searchTerm))
     }
 
     return false
 }
 
-type TreeNodeProps = {
+interface TreeNodeProps {
     node: NodeOf<IORegEntry>
     level?: number
     onSelect: (node: NodeOf<IORegEntry>) => void
@@ -37,15 +37,13 @@ const TreeNode: FC<TreeNodeProps> = ({
     autoExpand = false,
     searchTerm,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(node.initiallyExpanded || autoExpand)
+    const [isExpanded, setIsExpanded] = useState(node.initiallyExpanded ?? autoExpand)
 
     useEffect(() => {
         if (autoExpand) {
             setIsExpanded(true)
         }
     }, [autoExpand])
-
-    const hasChildren = node.children && node.children.length > 0
 
     if (!shouldShow(node, searchTerm)) return <></>
 
@@ -57,11 +55,13 @@ const TreeNode: FC<TreeNodeProps> = ({
                     selectedNode?.id === node.id && 'bg-gray-700 hover:bg-gray-700 text-blue-300'
                 )}
                 style={{ paddingLeft: `${level * 16}px` }}
-                onClick={() => onSelect(node)}
+                onClick={() => {
+                    onSelect(node)
+                }}
             >
                 {/* Expand/collapse button */}
                 <div className="flex items-center justify-center w-6 h-6">
-                    {hasChildren ? (
+                    {node.children.length > 0 ? (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation()
@@ -96,7 +96,7 @@ const TreeNode: FC<TreeNodeProps> = ({
             </div>
 
             {/* Children - only rendered when expanded */}
-            {hasChildren && isExpanded && (
+            {node.children.length > 0 && isExpanded && (
                 <div>
                     {node.children
                         .filter((node) => shouldShow(node, searchTerm))

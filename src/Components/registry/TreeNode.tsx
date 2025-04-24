@@ -9,6 +9,7 @@ const shouldShow = (node: NodeOf<IORegEntry>, searchTerm: string): boolean => {
     const nodeMatches =
         node.name.toLowerCase().includes(searchTerm) ||
         node.className.toLowerCase().includes(searchTerm) ||
+        node.parentClasses.some((cls) => cls.toLowerCase().includes(searchTerm)) ||
         node.id.toLowerCase().includes(searchTerm)
 
     if (nodeMatches) return true

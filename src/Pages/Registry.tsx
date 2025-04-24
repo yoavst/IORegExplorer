@@ -57,6 +57,7 @@ const buildTree = (entries: IORegEntry[]): NodeOf<IORegEntry>[] => {
 }
 
 const Registry: FC = () => {
+    const [name, setName] = useState<string>('')
     const [entries, setEntries] = useState<IORegEntry[]>([])
     const tree = useMemo(() => buildTree(entries), [entries])
     const [selectedEntry, setSelectedEntry] = useState<NodeOf<IORegEntry> | undefined>(undefined)
@@ -91,57 +92,70 @@ const Registry: FC = () => {
     )
 
     return (
-        <div
-            id="registry-container"
-            className="h-screen flex flex-col bg-gray-900 text-gray-100"
-            ref={containerRef}
-        >
-            <div className="flex flex-1 overflow-hidden">
-                {/* Left Panel */}
-                <div
-                    style={{ width: `${leftPanelWidth}%` }}
-                    className="h-full flex flex-col border-r border-gray-700"
-                >
-                    <div className="p-4 border-b border-gray-700 bg-gray-800">
-                        <div className="flex flex-col gap-4">
-                            <SearchBar
-                                onSearch={(query) => {
-                                    setSearchTerm(query.toLowerCase())
-                                }}
-                            />
-                            <FileUploader onUploadComplete={setEntries} />
+        <div id="registry-page" className="h-screen flex flex-col bg-gray-900 text-gray-100">
+            {name && (
+                <h1 className="w-screen bg-gray-800 text-white font-bold text-xl text-center p-1">
+                    {name}
+                </h1>
+            )}
+            <div
+                id="registry-container"
+                className="h-screen flex flex-col bg-gray-900 text-gray-100"
+                ref={containerRef}
+            >
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Left Panel */}
+                    <div
+                        style={{ width: `${leftPanelWidth}%` }}
+                        className="h-full flex flex-col border-r border-gray-700"
+                    >
+                        <div className="p-4 border-b border-gray-700 bg-gray-800">
+                            <div className="flex flex-col gap-4">
+                                <SearchBar
+                                    onSearch={(query) => {
+                                        setSearchTerm(query.toLowerCase())
+                                    }}
+                                />
+                                <FileUploader
+                                    onUploadComplete={(entries, name) => {
+                                        setEntries(entries)
+                                        setName(name)
+                                        setSelectedEntry(undefined)
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-auto bg-gray-900">
+                            {entries.length === 0 && (
+                                <div className="p-4 text-center text-gray-400">
+                                    No devices found. Upload an IOReg log file to begin.
+                                </div>
+                            )}
+
+                            {entries.length > 0 && (
+                                <TreeView
+                                    entries={tree}
+                                    searchTerm={searchTerm}
+                                    onSelectEntry={setSelectedEntry}
+                                    selectedEntry={selectedEntry}
+                                />
+                            )}
                         </div>
                     </div>
-                    <div className="flex-1 overflow-auto bg-gray-900">
-                        {entries.length === 0 && (
-                            <div className="p-4 text-center text-gray-400">
-                                No devices found. Upload an IOReg log file to begin.
-                            </div>
-                        )}
 
-                        {entries.length > 0 && (
-                            <TreeView
-                                entries={tree}
-                                searchTerm={searchTerm}
-                                onSelectEntry={setSelectedEntry}
-                                selectedEntry={selectedEntry}
-                            />
-                        )}
+                    {/* Resizer */}
+                    <div
+                        className="w-1 bg-gray-700 hover:bg-blue-500 cursor-col-resize hover:w-1"
+                        onMouseDown={startResize}
+                    />
+
+                    {/* Right Panel */}
+                    <div
+                        style={{ width: `${100 - leftPanelWidth}%` }}
+                        className="h-full overflow-auto bg-gray-800"
+                    >
+                        <PropertiesPanel entry={selectedEntry} />
                     </div>
-                </div>
-
-                {/* Resizer */}
-                <div
-                    className="w-1 bg-gray-700 hover:bg-blue-500 cursor-col-resize hover:w-1"
-                    onMouseDown={startResize}
-                />
-
-                {/* Right Panel */}
-                <div
-                    style={{ width: `${100 - leftPanelWidth}%` }}
-                    className="h-full overflow-auto bg-gray-800"
-                >
-                    <PropertiesPanel entry={selectedEntry} />
                 </div>
             </div>
         </div>

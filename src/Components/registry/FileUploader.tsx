@@ -114,7 +114,7 @@ const parseIORegistry = (text: string): IORegEntry[] => {
 }
 
 interface FileUploaderProps {
-    onUploadComplete: (entries: IORegEntry[]) => void
+    onUploadComplete: (entries: IORegEntry[], name: string) => void
 }
 const FileUploader: FC<FileUploaderProps> = ({ onUploadComplete }) => {
     const [isLoading, setIsLoading] = useState(false)
@@ -123,11 +123,12 @@ const FileUploader: FC<FileUploaderProps> = ({ onUploadComplete }) => {
         setIsLoading(true)
 
         try {
+            const name = file.name
             const text = await file.text()
             const entries = parseIORegistry(text)
 
             toast(`File parsed successfully! ${entries.length} entries found.`)
-            onUploadComplete(entries)
+            onUploadComplete(entries, name)
         } catch (error) {
             console.error('Error parsing file:', error)
             toast('Failed to parse the file. Please check the format and try again.')

@@ -1,6 +1,6 @@
-import { FC } from 'react'
+import { FC, useMemo } from 'react'
 import TreeNode from './TreeNode'
-import { IORegEntry, NodeOf } from '@/types'
+import { IORegEntry, NodeOf, nodeMatchesSearch } from '@/types'
 
 interface TreeViewProps {
     entries: NodeOf<IORegEntry>[]
@@ -9,10 +9,35 @@ interface TreeViewProps {
     selectedEntry?: NodeOf<IORegEntry>
 }
 
+const filterEntries = (entries: NodeOf<IORegEntry>[], searchTerm: string): NodeOf<IORegEntry>[] => {
+    if (searchTerm.length === 0) return entries
+
+    const filteredEntries: NodeOf<IORegEntry>[] = []
+
+    for (const node of entries) {
+        const isMatch = nodeMatchesSearch(node, searchTerm)
+        if (isMatch) {
+            filteredEntries.push(node)
+        } else {
+            const children =
+                node.children.length > 0 ? filterEntries(node.children, searchTerm) : []
+            if (children.length > 0) {
+                filteredEntries.push({
+                    ...node,
+                    children,
+                })
+            }
+        }
+    }
+
+    return filteredEntries
+}
+
 const TreeView: FC<TreeViewProps> = ({ entries, searchTerm, onSelectEntry, selectedEntry }) => {
+    const filteredEntries = useMemo(() => filterEntries(entries, searchTerm), [entries, searchTerm])
     return (
         <div className="py-2">
-            {entries.map((node) => (
+            {filteredEntries.map((node) => (
                 <TreeNode
                     key={node.index}
                     node={node}

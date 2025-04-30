@@ -40,13 +40,13 @@ const parseIORegistry = (text: string): IORegEntry[] => {
 
             // className is classA:classB:classC
             const classes = classChain.split(':')
-            const className = classes[0]
-            const parentClasses = classes.slice(1)
+            const className = classes[classes.length - 1]
+            classes.pop()
 
             currentEntry = {
                 name,
                 className,
-                parentClasses,
+                parentClasses: classes,
                 id,
                 index,
                 status,

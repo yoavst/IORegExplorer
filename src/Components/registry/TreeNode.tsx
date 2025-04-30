@@ -1,24 +1,7 @@
-import { useState, useEffect, FC } from 'react'
+import { useState, useEffect, FC, useMemo } from 'react'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { IORegEntry, NodeOf } from '@/types'
-
-const shouldShow = (node: NodeOf<IORegEntry>, searchTerm: string): boolean => {
-    if (searchTerm.length === 0) return true
-
-    const nodeMatches =
-        node.name.toLowerCase().includes(searchTerm) ||
-        node.className.toLowerCase().includes(searchTerm) ||
-        node.id.toLowerCase().includes(searchTerm)
-
-    if (nodeMatches) return true
-
-    if (node.children.length > 0) {
-        return node.children.some((child) => shouldShow(child, searchTerm))
-    }
-
-    return false
-}
+import { IORegEntry, NodeOf, nodeMatchesSearch } from '@/types'
 
 interface TreeNodeProps {
     node: NodeOf<IORegEntry>
@@ -38,14 +21,16 @@ const TreeNode: FC<TreeNodeProps> = ({
     searchTerm,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true)
+    const matchesSearchTerm = useMemo(
+        () => searchTerm.length > 0 && nodeMatchesSearch(node, searchTerm),
+        [node, searchTerm]
+    )
 
     useEffect(() => {
         if (autoExpand) {
             setIsExpanded(true)
         }
     }, [autoExpand])
-
-    if (!shouldShow(node, searchTerm)) return <></>
 
     return (
         <div>
@@ -85,7 +70,12 @@ const TreeNode: FC<TreeNodeProps> = ({
 
                 {/* Device info */}
                 <div className="flex items-center overflow-hidden gap-2">
-                    <span className="font-mono text-sm truncate text-gray-200">
+                    <span
+                        className={
+                            'font-mono text-sm truncate ' +
+                            (matchesSearchTerm ? 'text-green-200' : 'text-gray-200')
+                        }
+                    >
                         {node.name || 'Unnamed Device'}
                     </span>
                     {node.className && (
@@ -99,19 +89,17 @@ const TreeNode: FC<TreeNodeProps> = ({
             {/* Children - only rendered when expanded */}
             {node.children.length > 0 && isExpanded && (
                 <div>
-                    {node.children
-                        .filter((node) => shouldShow(node, searchTerm))
-                        .map((child) => (
-                            <TreeNode
-                                key={child.index}
-                                node={child}
-                                level={level + 1}
-                                onSelect={onSelect}
-                                selectedNode={selectedNode}
-                                autoExpand={autoExpand}
-                                searchTerm={searchTerm}
-                            />
-                        ))}
+                    {node.children.map((child) => (
+                        <TreeNode
+                            key={child.index}
+                            node={child}
+                            level={level + 1}
+                            onSelect={onSelect}
+                            selectedNode={selectedNode}
+                            autoExpand={autoExpand}
+                            searchTerm={searchTerm}
+                        />
+                    ))}
                 </div>
             )}
         </div>

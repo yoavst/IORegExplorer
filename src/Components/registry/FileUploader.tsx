@@ -3,6 +3,7 @@ import { Button } from '@/Components/ui/button'
 import { Upload, Loader2 } from 'lucide-react'
 import { IORegEntry } from '@/types'
 import { toast } from 'sonner'
+import Classes, { getParents, hasNode } from '@/hierarchy'
 
 const parseIORegistry = (text: string): IORegEntry[] => {
     const lines = text.split('\n')
@@ -42,11 +43,18 @@ const parseIORegistry = (text: string): IORegEntry[] => {
             const classes = classChain.split(':')
             const className = classes[classes.length - 1]
             classes.pop()
+            let parentClasses: string[]
+            if (classes.length === 0 && hasNode(Classes, className)) {
+                // Try to use IOKit classes cache to fill the parent classes
+                parentClasses = getParents(Classes, className)
+            } else {
+                parentClasses = classes
+            }
 
             currentEntry = {
                 name,
                 className,
-                parentClasses: classes,
+                parentClasses,
                 id,
                 index,
                 status,
